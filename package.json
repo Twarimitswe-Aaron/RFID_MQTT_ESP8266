@@ -1,0 +1,9 @@
+{
+	"type": "module",
+	"dependencies": {
+		"cors": "^2.8.6",
+		"express": "^5.2.1",
+		"mqtt": "^5.15.0",
+		"ws": "^8.19.0"
+	}
+}

@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+    <title>RFID Top-Up</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      input {
+        padding: 5px;
+        margin: 5px 0;
+      }
+      button {
+        padding: 5px 10px;
+      }
+      #log {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        background: #f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>RFID Card System</h2>
+
+    <p>Status: <span id="status">Connecting...</span></p>
+
+    <hr />
+
+    <label>UID:</label>
+    <input id="uid" placeholder="Card UID" />
+    <br />
+
+    <label>Amount:</label>
+    <input id="amount" type="number" placeholder="Amount" />
+    <br /><br />
+
+    <button onclick="sendTopup()">Send Top-Up</button>
+
+    <h3>Balances:</h3>
+    <div id="log">-- Waiting for messages --</div>
+
+    <script>
+      /* CENTRAL CONFIG */
+      const CONFIG = {
+        HOST: window.location.hostname, // Automatically matches 'localhost' or VPS IP
+        PORT: 5000,
+      };
+
+      const ws = new WebSocket(`ws://${CONFIG.HOST}:${CONFIG.PORT}`);
+      const log = document.getElementById("log");
+      const statusEl = document.getElementById("status");
+
+      // WebSocket events
+      ws.onopen = () => {
+        statusEl.innerText = "Connected";
+        appendLog("WebSocket connected.");
+      };
+
+      ws.onclose = () => {
+        statusEl.innerText = "Disconnected";
+        appendLog("WebSocket disconnected.");
+      };
+
+      ws.onerror = (err) => {
+        appendLog("WebSocket error: " + err.message);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const topic = data.topic;
+          const message = JSON.parse(data.message);
+
+          if (
+            topic.endsWith("/card/status") ||
+            topic.endsWith("/card/balance")
+          ) {
+            const balance =
+              message.balance !== undefined
+                ? message.balance
+                : message.new_balance;
+            appendLog(`UID: ${message.uid} | Balance: ${balance}`);
+          }
+        } catch (e) {
+          console.error("Failed to parse message", e);
+        }
+      };
+
+      // Send top-up request
+      function sendTopup() {
+        const uid = document.getElementById("uid").value.trim();
+        const amount = parseInt(document.getElementById("amount").value);
+
+        if (!uid) {
+          alert("Please enter a valid UID.");
+          return;
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+          alert("Please enter a valid positive amount.");
+          return;
+        }
+
+        if (amount > 1000000) {
+          alert("Amount is too large. Please enter a value up to 1,000,000.");
+          return;
+        }
+
+        fetch(`http://${CONFIG.HOST}:${CONFIG.PORT}/topup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, amount }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            appendLog(
+              `Top-up sent: UID=${uid}, Amount=${amount}, Server response=${data.status}`,
+            );
+          })
+          .catch((err) => appendLog("Top-up error: " + err.message));
+      }
+
+      // Helper to append log
+      function appendLog(msg) {
+        const time = new Date().toLocaleTimeString();
+        log.innerHTML += `[${time}] ${msg}<br>`;
+        log.scrollTop = log.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
