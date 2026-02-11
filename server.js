@@ -5,7 +5,7 @@ const CONFIG = {
   HOST: "0.0.0.0", // Server host
   MQTT_HOST: "mqtt://157.173.101.159:1883", // MQTT broker
   PORT: 5000,
-  TEAM_ID: "aaron01",
+  TEAM_ID: "1nt3rn4l_53rv3r_3rr0r",
 };
 
 /* ==========================================================
