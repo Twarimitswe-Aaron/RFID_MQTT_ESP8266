@@ -150,8 +150,12 @@ Follow these steps to get the entire system running on your local machine and ha
 
 ---
 
+## 🌐 Live Dashboard
 
-## ❓ Troubleshooting
+Access the deployed system dashboard here:
+👉 **[RFID System Live Dashboard](http://157.173.101.159:9271/rfid-dashboard.html)**
+
+---
 
 - **"Serial Port not found"**: Ensure you have the [CH340 drivers](https://sparks.gogo.co.nz/ch340.html) installed for your NodeMCU.
 - **WebSocket Connection Failed**: Ensure `server.js` is running and `PORT 5000` is not blocked by your local firewall.
