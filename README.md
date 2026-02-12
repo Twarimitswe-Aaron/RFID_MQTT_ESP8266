@@ -104,31 +104,59 @@ Used by the dashboard or external tools to add funds to a card.
 
 ## 🚀 Deployment Guide
 
-### **Local Setup**
+### 💻 Local Environment Setup
 
-1.  **Clone:** `git clone <repo-url>`
-2.  **Install:** `npm install`
-3.  **Start:** `node server.js`
-4.  **Access:** `http://localhost:5000`
+Follow these steps to get the entire system running on your local machine and hardware.
 
-### **VPS Deployment**
+#### 1. Software Prerequisites
 
-1.  **Connect:** `ssh user271@157.173.101.159`
-2.  **Transfer:** Use `scp` to move `server.js`, `package.json`, and `public/`.
-3.  **Execute:**
+- **Node.js**: [Download & Install](https://nodejs.org/) (v16+ recommended).
+- **Arduino IDE**: [Download & Install](https://www.arduino.cc/en/software).
+- **MQTT Explorer (Optional)**: Great for debugging. [Download here](http://mqtt-explorer.com/).
+
+#### 2. ESP8266 Firmware Setup
+
+1.  **Open Project**: Open `RFID_MQTT/RFID_MQTT.ino` in Arduino IDE.
+2.  **Board Manager**:
+    - Go to `File > Preferences`.
+    - Add to "Additional Boards Manager URLs": `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
+    - Go to `Tools > Board > Boards Manager`, search for **esp8266**, and install.
+3.  **Install Libraries**: Go to `Sketch > Include Library > Manage Libraries` and install:
+    - **MFRC522** (by GithubCommunity)
+    - **PubSubClient** (by Nick O'Leary)
+    - **ArduinoJson** (by Benoit Blanchon)
+4.  **Configure Code**:
+    - Update `WIFI_SSID` and `WIFI_PASS` in `RFID_MQTT.ino` (Lines 11-12).
+    - Ensure `MQTT_HOST` is set correctly (Line 13).
+5.  **Flash**: Select your board (e.g., NodeMCU 1.0) and Port, then click **Upload**.
+
+#### 3. Node.js Backend Setup
+
+1.  **Open Terminal**: Navigate to the project root directory.
+2.  **Install Dependencies**:
     ```bash
     npm install
-    sudo npm install -g pm2
-    pm2 start server.js --name "rfid-system"
     ```
-4.  **Access:** `http://157.173.101.159:5000`
+3.  **Start Server**:
+    ```bash
+    node server.js
+    ```
+    _Note: The backend acts as a translator, bridging MQTT events to the web dashboard via WebSockets._
+
+#### 4. Access the Dashboard
+
+- Open your browser and go to: `http://localhost:5000`
+- Scan an RFID card; you should see the UID and balance appear in the log terminal instantly.
 
 ---
 
+
 ## ❓ Troubleshooting
 
-- **Connection Lost?** Check the VPS firewall: `sudo ufw allow 5000`.
-- **Card not reading?** Verify SPI wiring (specifically SDA on D8 and RST on D3).
-- **Balance incorrect?** Ensure `RFID_MQTT.ino` was flashed with the latest version using `std::map`.
+- **"Serial Port not found"**: Ensure you have the [CH340 drivers](https://sparks.gogo.co.nz/ch340.html) installed for your NodeMCU.
+- **WebSocket Connection Failed**: Ensure `server.js` is running and `PORT 5000` is not blocked by your local firewall.
+- **MQTT Connection Failed**: Check your internet connection and ensure the host `157.173.101.159` is reachable.
+- **Card not reading?** Double-check the SPI wiring. The most common error is swapping SDA (D8) or RST (D3).
+- **Balance remains 0?** The system uses `std::map` in RAM; if the ESP8266 restarts, balances will reset unless top-ups are re-issued.
 
 ---
