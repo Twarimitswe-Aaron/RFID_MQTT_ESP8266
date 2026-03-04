@@ -8,8 +8,8 @@
 /* ==========================================================
    CENTRAL CONFIGURATION
    ========================================================== */
-#define WIFI_SSID     "EdNet"
-#define WIFI_PASS     "Huawei@123"
+#define WIFI_SSID     "GROUND"
+#define WIFI_PASS     "RCA@2024"
 #define MQTT_HOST     "157.173.101.159"
 
 #define MQTT_PORT     1883
@@ -26,7 +26,7 @@ String TOPIC_BAL    = BASE_TOPIC + "card/balance";
 /* ==========================================================
    RFID PINS
    ========================================================== */
-#define SS_PIN   D8
+#define SS_PIN   D4
 #define RST_PIN  D3
 MFRC522 rfid(SS_PIN, RST_PIN);
 
@@ -39,6 +39,7 @@ std::map<String, int> balances;
    WIFI
    ========================================================== */
 void setupWiFi() {
+  Serial.begin(9600);
   Serial.print("\nConnecting to ");
   Serial.println(WIFI_SSID);
   

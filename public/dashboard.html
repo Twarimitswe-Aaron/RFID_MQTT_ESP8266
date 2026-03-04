@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RFID Wallet System — Dashboard</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>"
+    />
+    <meta
+      name="description"
+      content="RFID Wallet Transaction System Dashboard — Top-Up, Payment, and Admin Management"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <!-- ════════════════════════════════════════ AUTH SCREEN ════════════════════════════════════════ -->
+    <div id="auth-screen" class="auth-wrapper">
+      <div class="auth-box fade-in">
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+        <h1>💳 RFID Wallet</h1>
+        <p class="subtitle">Secure Transaction System</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuthTab('login')">
+            Log In
+          </button>
+          <button class="auth-tab" onclick="switchAuthTab('signup')">
+            Sign Up
+          </button>
+        </div>
+
+        <div id="auth-alert" class="alert alert-error"></div>
+
+        <!-- Login Form -->
+        <form id="login-form" onsubmit="return handleLogin(event);">
+          <div class="form-group">
+            <label>Username</label>
+            <input
+              type="text"
+              id="login-user"
+              placeholder="Enter username"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="login-pass"
+              placeholder="Enter password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Log In</button>
+        </form>
+
+        <!-- Signup Form -->
+        <form
+          id="signup-form"
+          class="hidden"
+          onsubmit="return handleSignup(event);"
+        >
+          <div class="form-group">
+            <label>Username</label>
+            <input
+              type="text"
+              id="signup-user"
+              placeholder="Choose a username"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="signup-pass"
+              placeholder="Choose a password"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="signup-role" required>
+              <option value="agent">Agent (Top-Up)</option>
+              <option value="cashier">Cashier (Payments)</option>
+              <option value="admin">Admin (Full Access)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ MAIN APP ════════════════════════════════════════ -->
+    <div id="app-screen" class="app-layout hidden">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <h2>💳 RFID Wallet</h2>
+          <span>Transaction System</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+        <div class="sidebar-footer">
+          <div class="user-info">
+            Signed in as<br /><strong id="display-username"></strong>
+            <span
+              id="display-role"
+              class="badge"
+              style="margin-left: 6px"
+            ></span>
+          </div>
+          <div id="conn-status" class="conn-badge offline">
+            <span class="dot"></span> Offline
+          </div>
+          <button
+            class="btn btn-outline btn-sm"
+            style="margin-top: 10px; width: 100%"
+            onclick="logout()"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content" id="main-content"></main>
+    </div>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>
