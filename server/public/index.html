@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RFID Wallet Dashboard</title>
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      /* Custom scrollbar for log */
+      #log::-webkit-scrollbar { width: 8px; }
+      #log::-webkit-scrollbar-track { background: #0f0f1a; }
+      #log::-webkit-scrollbar-thumb { background: #33334d; border-radius: 0; }
+      #log::-webkit-scrollbar-thumb:hover { background: #4d4d66; }
+      
+      /* Subtle animations */
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .animate-float { animation: float 10s ease-in-out infinite; }
+    </style>
+  </head>
+  <body class="h-full bg-[#01010d] text-white overflow-hidden relative selection:bg-indigo-500 selection:text-white">
+    
+    <!-- Background Effects (Sharp) -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+      <!-- Dark overlay instead of glow -->
+      <div class="absolute inset-0 bg-[#01010d] opacity-90"></div>
+      <!-- Grid Pattern -->
+      <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-10 animate-float">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 border border-white/10 bg-white/5 backdrop-blur-md mb-6 shadow-xl">
+          <span class="relative flex h-2 w-2">
+            <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-none bg-indigo-400 opacity-75"></span>
+            <span id="status-dot" class="relative inline-flex rounded-none h-2 w-2 bg-indigo-500"></span>
+          </span>
+          <span id="status-text" class="text-xs font-medium tracking-wide text-indigo-200/80 uppercase">Connecting...</span>
+        </div>
+        
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white drop-shadow-2xl">
+          RFID System
+        </h1>
+        <p class="mt-4 text-slate-400 text-lg font-light tracking-wide max-w-lg mx-auto">
+          Secure, real-time IoT payment processing dashboard.
+        </p>
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-5xl">
+        
+        <!-- Left Column: Controls -->
+        <div class="relative">
+          <div class="relative bg-[#0a0a12] border border-white/10 p-8 h-full flex flex-col justify-center shadow-2xl">
+            <!-- Corner Accents -->
+            <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-indigo-500"></div>
+            <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-indigo-500"></div>
+            <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-indigo-500"></div>
+            <div class="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-indigo-500"></div>
+
+            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-white/90">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+              Manual Top-Up
+            </h2>
+            
+            <div class="space-y-5">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2ml-1 mb-2">Card UID</label>
+                <div class="relative">
+                  <input id="uid" type="text" placeholder="Scanning..." 
+                    class="w-full bg-[#181825] border border-white/10 rounded-none px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all font-mono tracking-wider"
+                  />
+                  <div class="absolute right-3 top-3.5 text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 ml-1">Amount</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-3 text-indigo-400 font-semibold">$</span>
+                  <input id="amount" type="number" placeholder="0.00" 
+                    class="w-full bg-[#181825] border border-white/10 rounded-none pl-8 pr-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all font-mono text-lg"
+                  />
+                </div>
+              </div>
+
+              <button onclick="sendTopup()" 
+                class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3.5 px-6 rounded-none shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                <span>Process Transaction</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Logs -->
+        <div class="relative h-[400px] lg:h-auto">
+          <div class="relative bg-[#0a0a12] border border-white/10 rounded-none h-full flex flex-col shadow-2xl overflow-hidden">
+            <!-- Terminal Header -->
+            <div class="px-5 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between font-mono">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1.5">
+                  <div class="w-2.5 h-2.5 bg-[#FF5F56]"></div>
+                  <div class="w-2.5 h-2.5 bg-[#FFBD2E]"></div>
+                  <div class="w-2.5 h-2.5 bg-[#27C93F]"></div>
+                </div>
+                <span class="text-xs text-slate-400 ml-2">log.sh</span>
+              </div>
+              <div class="text-[10px] text-slate-600">STDOUT</div>
+            </div>
+
+            <!-- Terminal Body -->
+            <div id="log" class="flex-1 p-4 overflow-y-auto font-mono text-sm space-y-2 text-slate-300">
+              <div class="opacity-50 italic text-slate-500 text-xs border-l-2 border-slate-700 pl-2">
+                READY FOR SCAN...
+              </div>
+            </div>
+            
+            <!-- Terminal Footer -->
+            <div class="px-4 py-2 bg-indigo-900/5 border-t border-white/5 text-[10px] text-indigo-300/60 font-mono flex items-center gap-2">
+              <span class="animate-pulse">_</span> Listening for data packets
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-12 text-slate-600 text-sm font-light tracking-widest">
+        <p>© 2026 1nt3rn4l_53rv3r_3rr0r | SYSTEM v1.0</p>
+      </footer>
+
+    </div>
+
+    <!-- Script Logic (Preserved Functionality) -->
+    <script>
+      /* CENTRAL CONFIG */
+      const CONFIG = {
+        HOST: window.location.hostname,
+        PORT: 5000,
+      };
+
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${wsProtocol}//${CONFIG.HOST}:${CONFIG.PORT}`);
+      const log = document.getElementById("log");
+      
+      const statusText = document.getElementById("status-text");
+      const statusPing = document.getElementById("status-ping");
+      const statusDot = document.getElementById("status-dot");
+
+      function setStatus(state) {
+        if (state === 'connected') {
+          statusText.innerText = "SYSTEM ONLINE";
+          statusText.className = "text-xs font-medium tracking-wide text-green-400/80 uppercase";
+          statusPing.className = "animate-ping absolute inline-flex h-full w-full bg-green-400 opacity-75";
+          statusDot.className = "relative inline-flex h-2 w-2 bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]";
+        } else if (state === 'disconnected') {
+          statusText.innerText = "DISCONNECTED";
+          statusText.className = "text-xs font-medium tracking-wide text-red-400/80 uppercase";
+          statusPing.className = "hidden";
+          statusDot.className = "relative inline-flex h-2 w-2 bg-red-500";
+        } else {
+          statusText.innerText = "CONNECTING...";
+          statusText.className = "text-xs font-medium tracking-wide text-indigo-200/80 uppercase";
+          statusPing.className = "animate-ping absolute inline-flex h-full w-full bg-indigo-400 opacity-75";
+          statusDot.className = "relative inline-flex h-2 w-2 bg-indigo-500";
+        }
+      }
+
+      ws.onopen = () => {
+        setStatus('connected');
+        appendLog("[SYSTEM] Connection initialized.", "success");
+      };
+
+      ws.onclose = () => {
+        setStatus('disconnected');
+        appendLog("[SYSTEM] Connection lost.", "error");
+      };
+
+      ws.onerror = (err) => {
+        appendLog(`[ERROR] WebSocket Fault: ${err.message || 'Unknown'}`, "error");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const topic = data.topic;
+          const message = JSON.parse(data.message);
+
+          if (topic.endsWith("/card/status") || topic.endsWith("/card/balance")) {
+            const balance = message.balance !== undefined ? message.balance : message.new_balance;
+            const uidInput = document.getElementById("uid");
+            if (!uidInput.value) {
+                uidInput.value = message.uid;
+                uidInput.classList.add('border-indigo-500');
+                setTimeout(() => uidInput.classList.remove('border-indigo-500'), 1000);
+            }
+            appendLog(`[SCAN] UID: ${message.uid} | BAL: $${balance}`, "info");
+          }
+        } catch (e) {
+          console.error("Failed to parse message", e);
+        }
+      };
+
+      function sendTopup() {
+        const uid = document.getElementById("uid").value.trim();
+        const amount = parseInt(document.getElementById("amount").value);
+
+        if (!uid) {
+          appendLog("[WARN] No UID provided.", "warning");
+          document.getElementById("uid").focus();
+          return;
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+          appendLog("[WARN] Invalid amount specified.", "warning");
+          document.getElementById("amount").focus();
+          return;
+        }
+
+        if (amount > 1000000) {
+          appendLog("[WARN] Amount exceeds limit.", "warning");
+          return;
+        }
+
+        appendLog(`[ACTION] Top-up initiated for ${uid}...`);
+
+        fetch(`http://${CONFIG.HOST}:${CONFIG.PORT}/topup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, amount }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if(data.error) {
+              appendLog(`[FAIL] ${data.error}`, "error");
+            } else {
+              appendLog(`[SUCCESS] Transferred $${amount} to ${uid}`, "success");
+              document.getElementById("amount").value = "";
+            }
+          })
+          .catch((err) => appendLog(`[FAIL] ${err.message}`, "error"));
+      }
+
+      function appendLog(msg, type = "neutral") {
+        const time = new Date().toLocaleTimeString([], { hour12: false });
+        let colorClass = "text-slate-300";
+        
+        if (type === "success") { colorClass = "text-green-400"; }
+        else if (type === "error") { colorClass = "text-red-400"; }
+        else if (type === "warning") { colorClass = "text-yellow-400"; }
+        else if (type === "info") { colorClass = "text-blue-400"; }
+
+        const logItem = document.createElement('div');
+        logItem.className = `border-l-2 border-transparent pl-2 hover:bg-white/5 py-0.5 animate-in`;
+        
+        if (type === "success") logItem.classList.add("border-green-500/50");
+        if (type === "error") logItem.classList.add("border-red-500/50");
+
+        logItem.innerHTML = `<span class="text-slate-600 text-[10px] mr-2 font-mono">${time}</span><span class="${colorClass}">${msg}</span>`;
+        
+        log.appendChild(logItem);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      document.getElementById("amount").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") sendTopup();
+      });
+
+      // Register Service Worker for PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed'));
+      }
+    </script>
+    <style>
+        .animate-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateX(-2px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+  </body>
+</html>
